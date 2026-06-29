@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>Diário 100 Dias</title>
+<style>
+:root {
+  --navy: #1A2233;
+  --blue: #185FA5;
+  --blue-light: #E6F1FB;
+  --blue-mid: #B5D4F4;
+  --gold: #BA7517;
+  --gold-light: #FAEEDA;
+  --green: #3B6D11;
+  --green-light: #EAF3DE;
+  --text: #1A2233;
+  --text-muted: #6B7280;
+  --bg: #F3F4F6;
+  --surface: #FFFFFF;
+  --border: rgba(0,0,0,0.10);
+  --border-med: rgba(0,0,0,0.18);
+  --radius: 12px;
+  --radius-sm: 8px;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --text: #F0F2F5;
+    --text-muted: #9CA3AF;
+    --bg: #111827;
+    --surface: #1F2937;
+    --border: rgba(255,255,255,0.10);
+    --border-med: rgba(255,255,255,0.18);
+    --blue-light: #0C2240;
+    --gold-light: #2A1E04;
+    --green-light: #0B2005;
+  }
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 16px; overflow: hidden; }
+
+/* APP SHELL */
+.app { display: flex; flex-direction: column; height: 100vh; max-width: 480px; margin: 0 auto; position: relative; }
+.topbar { background: var(--surface); border-bottom: 0.5px solid var(--border); padding: 12px 16px; display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+.topbar-icon { width: 36px; height: 36px; border-radius: 9px; background: var(--blue); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.topbar-icon svg { width: 20px; height: 20px; fill: none; stroke: #fff; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.topbar-title { font-size: 15px; font-weight: 600; flex: 1; }
+.topbar-sub { font-size: 12px; color: var(--text-muted); }
+.icon-btn { background: none; border: none; cursor: pointer; color: var(--text-muted); padding: 4px; display: flex; align-items: center; justify-content: center; border-radius: 8px; }
+.icon-btn:active { background: var(--border); }
+.icon-btn svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.progress-bar { height: 3px; background: var(--border); flex-shrink: 0; }
+.progress-fill { height: 100%; background: var(--blue); transition: width .5s; }
+
+/* SCREENS */
+.screens { flex: 1; overflow: hidden; position: relative; }
+.screen { position: absolute; inset: 0; overflow-y: auto; padding: 16px; display: none; -webkit-overflow-scrolling: touch; }
+.screen.active { display: block; }
+
+/* BOTTOM NAV */
+.bottomnav { background: var(--surface); border-top: 0.5px solid var(--border); display: flex; flex-shrink: 0; padding-bottom: env(safe-area-inset-bottom); }
+.nav-btn { flex: 1; padding: 10px 4px 8px; font-size: 10px; color: var(--text-muted); border: none; background: none; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 3px; border-top: 2px solid transparent; }
+.nav-btn.active { color: var(--blue); border-top-color: var(--blue); }
+.nav-btn svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+
+/* CARDS */
+.card { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 16px; margin-bottom: 12px; }
+.card-title { font-size: 13px; font-weight: 600; color: var(--text-muted); margin-bottom: 12px; display: flex; align-items: center; gap: 6px; text-transform: uppercase; letter-spacing: .04em; }
+.card-title svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+/* FORMS */
+label { font-size: 13px; font-weight: 500; color: var(--text-muted); display: block; margin: 12px 0 5px; }
+label:first-child { margin-top: 0; }
+textarea, input[type=text], input[type=number], input[type=date] {
+  width: 100%; border: 0.5px solid var(--border-med); border-radius: var(--radius-sm);
+  padding: 10px 12px; font-size: 15px; font-family: inherit; background: var(--bg);
+  color: var(--text); resize: none; -webkit-appearance: none; appearance: none;
+}
+textarea:focus, input:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px rgba(24,95,165,.12); }
+
+/* MIT */
+.mit-row { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 8px; }
+.mit-check { width: 22px; height: 22px; border: 1.5px solid var(--border-med); border-radius: 6px; cursor: pointer; flex-shrink: 0; margin-top: 9px; display: flex; align-items: center; justify-content: center; transition: .15s; }
+.mit-check.done { background: var(--blue); border-color: var(--blue); }
+.mit-check.done::after { content: ''; width: 5px; height: 9px; border: 2px solid #fff; border-top: none; border-left: none; transform: rotate(45deg); display: block; margin-top: -2px; }
+.mit-check + textarea { flex: 1; }
+
+/* STARS */
+.stars { display: flex; gap: 4px; flex-wrap: wrap; }
+.star { width: 28px; height: 28px; border-radius: 6px; border: 0.5px solid var(--border-med); background: var(--bg); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 500; color: var(--text-muted); transition: .1s; user-select: none; }
+.star.on { background: var(--blue); border-color: var(--blue); color: #fff; }
+
+/* GRATIDÃO */
+.grat-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.grat-num { width: 22px; height: 22px; border-radius: 50%; background: var(--blue-light); color: var(--blue); font-size: 11px; font-weight: 600; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+
+/* DIVIDER */
+hr { border: none; border-top: 0.5px solid var(--border); margin: 16px 0; }
+
+/* BUTTONS */
+.btn-primary { width: 100%; padding: 14px; background: var(--blue); color: #fff; border: none; border-radius: var(--radius); font-size: 15px; font-weight: 600; cursor: pointer; letter-spacing: .01em; }
+.btn-primary:active { opacity: .85; transform: scale(.99); }
+.btn-ghost { width: 100%; padding: 11px; background: none; color: var(--blue); border: 0.5px solid var(--blue); border-radius: var(--radius); font-size: 14px; font-weight: 500; cursor: pointer; margin-top: 8px; }
+.btn-ghost:active { background: var(--blue-light); }
+.saved-badge { display: none; align-items: center; gap: 8px; color: var(--green); font-size: 13px; background: var(--green-light); border-radius: var(--radius-sm); padding: 10px 14px; margin-top: 10px; }
+.saved-badge.show { display: flex; }
+
+/* DAY HEADER */
+.day-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.day-header-info .day-label { font-size: 11px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: .05em; }
+.day-header-info .day-date { font-size: 19px; font-weight: 600; margin-top: 2px; }
+.nav-days { display: flex; gap: 8px; }
+.nav-day-btn { width: 34px; height: 34px; border-radius: 50%; border: 0.5px solid var(--border-med); background: none; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text-muted); }
+.nav-day-btn:active { background: var(--border); }
+.nav-day-btn svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+
+/* SECTION LABEL */
+.section-label { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; padding: 6px 10px; border-radius: 6px; display: inline-flex; align-items: center; gap: 6px; margin-bottom: 12px; }
+.section-label.morning { background: var(--gold-light); color: var(--gold); }
+.section-label.night { background: var(--blue-light); color: var(--blue); }
+
+/* PROGRESS SCREEN */
+.metric-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+.metric { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 14px; }
+.metric-label { font-size: 11px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: .04em; margin-bottom: 6px; }
+.metric-val { font-size: 24px; font-weight: 600; }
+.metric-val small { font-size: 13px; font-weight: 400; color: var(--text-muted); }
+.streak-box { background: var(--gold-light); border-radius: var(--radius); padding: 14px 16px; display: flex; align-items: center; gap: 14px; margin-bottom: 12px; }
+.streak-num { font-size: 36px; font-weight: 700; color: var(--gold); line-height: 1; }
+.streak-info { font-size: 13px; color: #633806; }
+
+/* DAY GRID */
+.day-grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 3px; }
+.dc { aspect-ratio: 1; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 500; cursor: pointer; background: var(--bg); color: var(--text-muted); border: 0.5px solid var(--border); }
+.dc.done { background: var(--blue-light); color: var(--blue); border-color: var(--blue-mid); }
+.dc.today { background: var(--blue); color: #fff; border-color: var(--blue); }
+.dc.sprint-rev { background: var(--green-light); color: var(--green); border-color: #C0DD97; }
+.dc-legend { display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap; }
+.dc-leg { display: flex; align-items: center; gap: 4px; font-size: 11px; color: var(--text-muted); }
+.dc-leg-dot { width: 10px; height: 10px; border-radius: 2px; }
+
+/* AVG RATING */
+.avg-row { display: flex; align-items: center; justify-content: space-between; padding: 9px 0; border-bottom: 0.5px solid var(--border); }
+.avg-row:last-child { border-bottom: none; }
+.avg-bar-wrap { width: 80px; height: 5px; border-radius: 3px; background: var(--border); overflow: hidden; }
+.avg-bar-fill { height: 100%; border-radius: 3px; background: var(--blue); }
+
+/* SPRINTS */
+.sprint-card { display: flex; align-items: center; gap: 12px; padding: 13px 14px; background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); margin-bottom: 8px; cursor: pointer; }
+.sprint-card:active { background: var(--bg); }
+.sprint-num-badge { width: 40px; height: 40px; border-radius: 10px; background: var(--blue); color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; flex-shrink: 0; gap: 1px; }
+.sprint-num-badge span { font-size: 18px; font-weight: 700; line-height: 1; }
+.sprint-info { flex: 1; min-width: 0; }
+.sprint-title { font-size: 14px; font-weight: 600; }
+.sprint-sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+.sprint-pct { display: flex; flex-direction: column; align-items: flex-end; gap: 5px; flex-shrink: 0; }
+.sprint-pct-num { font-size: 13px; font-weight: 600; color: var(--blue); }
+.sprint-pct-bar { width: 44px; height: 4px; border-radius: 2px; background: var(--border); overflow: hidden; }
+.sprint-pct-fill { height: 100%; border-radius: 2px; background: var(--blue); }
+
+/* OBJETIVO */
+.obj-section { background: var(--bg); border-radius: var(--radius-sm); padding: 12px; margin-bottom: 8px; }
+.obj-section-label { font-size: 10px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 4px; }
+.obj-section-val { font-size: 14px; color: var(--text); line-height: 1.5; }
+
+/* HIST */
+.hist-row { padding: 10px 0; border-bottom: 0.5px solid var(--border); }
+.hist-row:last-child { border-bottom: none; }
+
+/* TABS */
+.tab-row { display: flex; gap: 6px; margin-bottom: 14px; }
+.tab { padding: 7px 14px; border-radius: 20px; font-size: 13px; font-weight: 500; cursor: pointer; border: 0.5px solid var(--border-med); background: none; color: var(--text-muted); }
+.tab.active { background: var(--blue); color: #fff; border-color: var(--blue); }
+
+/* MODAL */
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.5); display: none; align-items: flex-end; justify-content: center; z-index: 100; }
+.modal-overlay.open { display: flex; }
+.modal-box { background: var(--surface); border-radius: 20px 20px 0 0; width: 100%; max-width: 480px; padding: 20px 20px calc(20px + env(safe-area-inset-bottom)); max-height: 92vh; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+.modal-handle { width: 36px; height: 4px; border-radius: 2px; background: var(--border-med); margin: 0 auto 16px; }
+.modal-title { font-size: 17px; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; }
+
+/* EMPTY */
+.empty { text-align: center; padding: 32px 16px; color: var(--text-muted); }
+.empty svg { width: 40px; height: 40px; stroke: var(--border-med); margin-bottom: 12px; }
+.empty p { font-size: 13px; }
+
+/* FLOATING HINT */
+.hint { font-size: 12px; color: var(--text-muted); font-style: italic; margin-top: 4px; }
+
+/* TWO COL */
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="topbar-icon">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M2 12h3M19 12h3M4.22 19.78l2.12-2.12M17.66 6.34l2.12-2.12"/></svg>
+    </div>
+    <div style="flex:1">
+      <div class="topbar-title">Diário dos 100 Dias</div>
+      <div class="topbar-sub" id="top-sub">Negócios &amp; Finanças</div>
+    </div>
+    <button class="icon-btn" onclick="openModal('config')" aria-label="Configurações">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    </button>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" id="main-progress" style="width:0%"></div></div>
+
+  <!-- SCREENS -->
+  <div class="screens">
+
+    <!-- HOJE -->
+    <div class="screen active" id="screen-hoje">
+      <div class="day-header">
+        <div class="day-header-info">
+          <div class="day-label" id="hoje-label">Dia 1 de 100 · Sprint 1</div>
+          <div class="day-date" id="hoje-date"></div>
+        </div>
+        <div class="nav-days">
+          <button class="nav-day-btn" onclick="navDay(-1)" aria-label="Dia anterior">
+            <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+          </button>
+          <button class="nav-day-btn" onclick="navDay(1)" aria-label="Próximo dia">
+            <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- MANHÃ -->
+      <div class="card">
+        <div class="section-label morning">☀️ Ritual da manhã</div>
+        <label>Foco do dia</label>
+        <textarea id="f-foco" rows="2" placeholder="O que tornará esse dia produtivo?"></textarea>
+        <label>Meta de negócio do dia</label>
+        <input type="text" id="f-meta" placeholder="Ex: fechar 1 novo aluno no VIP">
+        <label>3 tarefas essenciais (MIT)</label>
+        <div class="mit-row"><div class="mit-check" id="mc0" onclick="toggleMit(0)"></div><textarea id="mt0" rows="1" placeholder="Tarefa 1"></textarea></div>
+        <div class="mit-row"><div class="mit-check" id="mc1" onclick="toggleMit(1)"></div><textarea id="mt1" rows="1" placeholder="Tarefa 2"></textarea></div>
+        <div class="mit-row"><div class="mit-check" id="mc2" onclick="toggleMit(2)"></div><textarea id="mt2" rows="1" placeholder="Tarefa 3"></textarea></div>
+        <label>Gratidão — 3 coisas pelas quais sou grato</label>
+        <div class="grat-row"><div class="grat-num">1</div><input type="text" id="g0" placeholder="Gratidão 1"></div>
+        <div class="grat-row"><div class="grat-num">2</div><input type="text" id="g1" placeholder="Gratidão 2"></div>
+        <div class="grat-row"><div class="grat-num">3</div><input type="text" id="g2" placeholder="Gratidão 3"></div>
+        <label>Nível de energia</label>
+        <div class="stars" id="r-energia"></div>
+        <label>Clareza mental</label>
+        <div class="stars" id="r-clareza"></div>
+      </div>
+
+      <!-- NOITE -->
+      <div class="card">
+        <div class="section-label night">🌙 Reflexão noturna</div>
+        <label>Maior conquista do dia</label>
+        <textarea id="f-conquista" rows="2" placeholder="O que realizei de mais importante?"></textarea>
+        <label>Como esse dia me aproximou do objetivo?</label>
+        <textarea id="f-aprox" rows="2" placeholder="Conexão com o objetivo central..."></textarea>
+        <label>Maior obstáculo e como lidei com ele</label>
+        <textarea id="f-obst" rows="2" placeholder="Obstáculo e resposta..."></textarea>
+        <label>O que faria diferente amanhã?</label>
+        <input type="text" id="f-amanha" placeholder="Ajuste para o próximo dia">
+        <label>Resultado financeiro do dia</label>
+        <div class="two-col">
+          <div><input type="number" id="f-receita" placeholder="Receita R$"></div>
+          <div><input type="number" id="f-leads" placeholder="Leads"></div>
+        </div>
+        <label>Produtividade</label>
+        <div class="stars" id="r-produt"></div>
+        <label>Alinhamento com o objetivo</label>
+        <div class="stars" id="r-alinha"></div>
+      </div>
+
+      <button class="btn-primary" onclick="saveDay()">Salvar dia</button>
+      <div class="saved-badge" id="saved-badge">
+        <svg style="width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        Dia salvo com sucesso!
+      </div>
+    </div>
+
+    <!-- PROGRESSO -->
+    <div class="screen" id="screen-progresso">
+      <div class="metric-grid">
+        <div class="metric">
+          <div class="metric-label">Dias concluídos</div>
+          <div class="metric-val" id="m-dias">0 <small>/ 100</small></div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Receita acumulada</div>
+          <div class="metric-val">R$ <span id="m-rec-val" style="font-size:18px">0</span></div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">MIT concluídas</div>
+          <div class="metric-val" id="m-mit">0 <small>total</small></div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Leads gerados</div>
+          <div class="metric-val" id="m-leads">0 <small>total</small></div>
+        </div>
+      </div>
+      <div class="streak-box">
+        <div class="streak-num" id="streak-num">0</div>
+        <div class="streak-info">
+          <strong>dias consecutivos</strong><br>
+          <span style="font-size:12px;opacity:.8">Continue o ritmo!</span>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">
+          <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          100 dias
+        </div>
+        <div class="day-grid" id="day-grid"></div>
+        <div class="dc-legend">
+          <div class="dc-leg"><div class="dc-leg-dot" style="background:var(--blue-light);border:0.5px solid var(--blue-mid)"></div>Preenchido</div>
+          <div class="dc-leg"><div class="dc-leg-dot" style="background:var(--blue)"></div>Hoje</div>
+          <div class="dc-leg"><div class="dc-leg-dot" style="background:var(--green-light);border:0.5px solid #C0DD97"></div>Sprint revisto</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">
+          <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          Médias
+        </div>
+        <div id="avg-ratings"></div>
+      </div>
+    </div>
+
+    <!-- SPRINTS -->
+    <div class="screen" id="screen-sprints">
+      <div class="tab-row">
+        <button class="tab active" onclick="setSprintTab('lista',this)">Sprints</button>
+        <button class="tab" onclick="setSprintTab('revisao',this)">Revisões</button>
+      </div>
+      <div id="sprint-lista"></div>
+      <div id="sprint-revisao" style="display:none"></div>
+    </div>
+
+    <!-- OBJETIVO -->
+    <div class="screen" id="screen-objetivo">
+      <div class="card">
+        <div class="card-title">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+          Objetivo central
+        </div>
+        <div id="obj-display"></div>
+        <button class="btn-ghost" onclick="openModal('objetivo')">Editar objetivo</button>
+      </div>
+      <div class="card">
+        <div class="card-title">
+          <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          Histórico recente
+        </div>
+        <div id="historico"></div>
+      </div>
+    </div>
+
+  </div><!-- end screens -->
+
+  <!-- BOTTOM NAV -->
+  <div class="bottomnav">
+    <button class="nav-btn active" onclick="goScreen('hoje',this)">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+      Hoje
+    </button>
+    <button class="nav-btn" onclick="goScreen('progresso',this)">
+      <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      Progresso
+    </button>
+    <button class="nav-btn" onclick="goScreen('sprints',this)">
+      <svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+      Sprints
+    </button>
+    <button class="nav-btn" onclick="goScreen('objetivo',this)">
+      <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+      Objetivo
+    </button>
+  </div>
+
+</div><!-- end app -->
+
+<!-- MODAL OBJETIVO -->
+<div class="modal-overlay" id="modal-objetivo">
+  <div class="modal-box">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Objetivo dos 100 dias
+      <button class="icon-btn" onclick="closeModal('objetivo')" aria-label="Fechar">
+        <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <label>Objetivo central</label>
+    <textarea id="obj-central" rows="3" placeholder="Qual é o seu objetivo nos próximos 100 dias?"></textarea>
+    <label>Por que esse objetivo é essencial?</label>
+    <textarea id="obj-porque" rows="3" placeholder="O que muda na sua vida ao alcançá-lo?"></textarea>
+    <div class="two-col">
+      <div>
+        <label>Receita alvo (R$)</label>
+        <input type="number" id="obj-receita-alvo" placeholder="Ex: 30000">
+      </div>
+      <div>
+        <label>Clientes alvo</label>
+        <input type="number" id="obj-clientes" placeholder="Ex: 8">
+      </div>
+    </div>
+    <label>Marco de sucesso concreto</label>
+    <textarea id="obj-marco" rows="2" placeholder="Como saberei que atingi o objetivo?"></textarea>
+    <label>Data de início do ciclo</label>
+    <input type="date" id="obj-inicio">
+    <button class="btn-primary" onclick="saveObjetivo()" style="margin-top:20px">Salvar objetivo</button>
+  </div>
+</div>
+
+<!-- MODAL CONFIG -->
+<div class="modal-overlay" id="modal-config">
+  <div class="modal-box">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Configurações
+      <button class="icon-btn" onclick="closeModal('config')" aria-label="Fechar">
+        <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <label>Seu nome</label>
+    <input type="text" id="cfg-nome" placeholder="Ex: Thiago">
+    <label>Dia atual do ciclo (1–100)</label>
+    <input type="number" id="cfg-dia" min="1" max="100">
+    <div style="margin-top:20px;padding:14px;background:var(--bg);border-radius:var(--radius-sm)">
+      <div style="font-size:13px;font-weight:600;margin-bottom:4px">Zona de perigo</div>
+      <div style="font-size:12px;color:var(--text-muted);margin-bottom:12px">Apaga todos os registros do diário permanentemente.</div>
+      <button onclick="clearData()" style="padding:10px 16px;border:0.5px solid #E24B4A;color:#E24B4A;background:none;border-radius:var(--radius-sm);cursor:pointer;font-size:14px;font-family:inherit">Limpar todos os dados</button>
+    </div>
+    <button class="btn-primary" onclick="saveConfig()" style="margin-top:20px">Salvar</button>
+  </div>
+</div>
+
+<!-- MODAL SPRINT -->
+<div class="modal-overlay" id="modal-sprint">
+  <div class="modal-box">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="sprint-modal-title">Revisão de Sprint
+      <button class="icon-btn" onclick="closeModal('sprint')" aria-label="Fechar">
+        <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div id="sprint-modal-body"></div>
+    <button class="btn-primary" onclick="saveSprint()" style="margin-top:20px">Salvar revisão</button>
+  </div>
+</div>
+
+<script>
+const DAYS = 100;
+let state = { currentDay: 1, nome: '', startDate: null, objetivo: {}, days: {}, sprints: {} };
+let mitDone = [false, false, false];
+let editingSprint = null;
+
+function load() {
+  try { const s = localStorage.getItem('d100v2'); if (s) state = JSON.parse(s); } catch(e) {}
+  if (!state.startDate) state.startDate = new Date().toISOString().split('T')[0];
+  if (!state.currentDay) state.currentDay = 1;
+  render();
+}
+
+function persist() { try { localStorage.setItem('d100v2', JSON.stringify(state)); } catch(e) {} }
+
+function getSprint(d) { return Math.ceil(d / 10); }
+
+function getDateForDay(day) {
+  const d = new Date(state.startDate);
+  d.setDate(d.getDate() + day - 1);
+  return d;
+}
+
+function render() {
+  renderTopbar();
+  renderHoje();
+}
+
+function renderTopbar() {
+  const d = state.currentDay || 1;
+  document.getElementById('main-progress').style.width = Math.round(d / DAYS * 100) + '%';
+  document.getElementById('top-sub').textContent = 'Dia ' + d + ' · Sprint ' + getSprint(d);
+}
+
+function renderHoje() {
+  const day = state.currentDay || 1;
+  document.getElementById('hoje-label').textContent = 'Dia ' + day + ' de 100 · Sprint ' + getSprint(day);
+  const d = getDateForDay(day);
+  document.getElementById('hoje-date').textContent = d.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' });
+  const data = state.days[day] || {};
+  ['foco','meta','conquista','aprox','obst','amanha'].forEach(f => {
+    const el = document.getElementById('f-' + f); if (el) el.value = data[f] || '';
+  });
+  const el_r = document.getElementById('f-receita'); if (el_r) el_r.value = data.receita || '';
+  const el_l = document.getElementById('f-leads'); if (el_l) el_l.value = data.leads || '';
+  const grats = data.gratidao || ['','',''];
+  for (let i = 0; i < 3; i++) { const el = document.getElementById('g'+i); if(el) el.value = grats[i]||''; }
+  const mits = data.mits || ['','',''];
+  mitDone = [...(data.mitDone || [false,false,false])];
+  for (let i = 0; i < 3; i++) {
+    const ta = document.getElementById('mt'+i); if(ta) ta.value = mits[i]||'';
+    const ch = document.getElementById('mc'+i); if(ch) ch.classList.toggle('done', mitDone[i]);
+  }
+  const ratings = data.ratings || {};
+  ['energia','clareza','produt','alinha'].forEach(k => renderStars(k, ratings[k] || 0));
+  document.getElementById('saved-badge').classList.remove('show');
+}
+
+function renderStars(key, val) {
+  const el = document.getElementById('r-' + key); if (!el) return;
+  el.innerHTML = '';
+  for (let i = 1; i <= 10; i++) {
+    const s = document.createElement('div');
+    s.className = 'star' + (i <= val ? ' on' : '');
+    s.textContent = i;
+    const v = i;
+    s.onclick = () => setRating(key, v);
+    el.appendChild(s);
+  }
+}
+
+function setRating(key, val) {
+  const day = state.currentDay || 1;
+  if (!state.days[day]) state.days[day] = {};
+  if (!state.days[day].ratings) state.days[day].ratings = {};
+  state.days[day].ratings[key] = val;
+  renderStars(key, val);
+}
+
+function toggleMit(i) {
+  mitDone[i] = !mitDone[i];
+  const ch = document.getElementById('mc' + i); if (ch) ch.classList.toggle('done', mitDone[i]);
+}
+
+function navDay(delta) {
+  state.currentDay = Math.max(1, Math.min(DAYS, (state.currentDay || 1) + delta));
+  mitDone = [false, false, false];
+  renderHoje();
+  renderTopbar();
+}
+
+function saveDay() {
+  const day = state.currentDay || 1;
+  const mits = [0,1,2].map(i => document.getElementById('mt'+i)?.value || '');
+  const grats = [0,1,2].map(i => document.getElementById('g'+i)?.value || '');
+  const existing = state.days[day] || {};
+  state.days[day] = {
+    ...existing,
+    foco: document.getElementById('f-foco')?.value || '',
+    meta: document.getElementById('f-meta')?.value || '',
+    conquista: document.getElementById('f-conquista')?.value || '',
+    aprox: document.getElementById('f-aprox')?.value || '',
+    obst: document.getElementById('f-obst')?.value || '',
+    amanha: document.getElementById('f-amanha')?.value || '',
+    receita: parseFloat(document.getElementById('f-receita')?.value) || 0,
+    leads: parseInt(document.getElementById('f-leads')?.value) || 0,
+    mits, gratidao: grats, mitDone: [...mitDone],
+    ratings: existing.ratings || {},
+    saved: true
+  };
+  persist();
+  const badge = document.getElementById('saved-badge');
+  badge.classList.add('show');
+  setTimeout(() => badge.classList.remove('show'), 2500);
+}
+
+function renderProgresso() {
+  const savedDays = Object.keys(state.days).map(Number).filter(d => state.days[d]?.saved);
+  document.getElementById('m-dias').innerHTML = savedDays.length + ' <small>/ 100</small>';
+  const receita = savedDays.reduce((a, d) => a + (state.days[d]?.receita || 0), 0);
+  document.getElementById('m-rec-val').textContent = Math.round(receita).toLocaleString('pt-BR');
+  const mit = savedDays.reduce((a, d) => a + (state.days[d]?.mitDone || []).filter(Boolean).length, 0);
+  document.getElementById('m-mit').innerHTML = mit + ' <small>total</small>';
+  const leads = savedDays.reduce((a, d) => a + (state.days[d]?.leads || 0), 0);
+  document.getElementById('m-leads').innerHTML = leads + ' <small>total</small>';
+
+  let streak = 0;
+  const today = state.currentDay || 1;
+  for (let i = today; i >= 1; i--) { if (state.days[i]?.saved) streak++; else break; }
+  document.getElementById('streak-num').textContent = streak;
+
+  const grid = document.getElementById('day-grid');
+  grid.innerHTML = '';
+  for (let d = 1; d <= DAYS; d++) {
+    const c = document.createElement('div');
+    c.className = 'dc';
+    c.textContent = d;
+    if (state.days[d]?.saved) c.classList.add('done');
+    if (d === today) c.classList.add('today');
+    if (d % 10 === 0 && state.sprints[getSprint(d)]?.saved) c.classList.add('sprint-rev');
+    c.onclick = () => { state.currentDay = d; mitDone = [false,false,false]; goScreen('hoje', document.querySelector('.nav-btn')); renderHoje(); renderTopbar(); };
+    grid.appendChild(c);
+  }
+
+  const rs = ['energia','clareza','produt','alinha'];
+  const labels = { energia:'Energia', clareza:'Clareza mental', produt:'Produtividade', alinha:'Alinhamento' };
+  const avgEl = document.getElementById('avg-ratings');
+  if (!savedDays.length) { avgEl.innerHTML = '<div class="empty"><p>Preencha os primeiros dias para ver as médias</p></div>'; return; }
+  avgEl.innerHTML = rs.map(r => {
+    const vals = savedDays.map(d => state.days[d]?.ratings?.[r]).filter(v => v > 0);
+    const avg = vals.length ? (vals.reduce((a,b)=>a+b,0)/vals.length) : 0;
+    return `<div class="avg-row">
+      <span style="font-size:13px;color:var(--text-muted)">${labels[r]}</span>
+      <div style="display:flex;align-items:center;gap:8px">
+        <div class="avg-bar-wrap"><div class="avg-bar-fill" style="width:${avg*10}%"></div></div>
+        <span style="font-size:14px;font-weight:600;min-width:28px;text-align:right">${vals.length ? avg.toFixed(1) : '—'}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderSprints() {
+  const lista = document.getElementById('sprint-lista');
+  lista.innerHTML = '';
+  for (let s = 1; s <= 10; s++) {
+    const start = (s-1)*10+1, end = s*10;
+    const days = Array.from({length:10},(_,i)=>start+i).filter(d => state.days[d]?.saved);
+    const pct = Math.round(days.length / 10 * 100);
+    const rev = state.sprints[s];
+    const div = document.createElement('div');
+    div.className = 'sprint-card';
+    div.innerHTML = `
+      <div class="sprint-num-badge">Sprint <span>${s}</span></div>
+      <div class="sprint-info">
+        <div class="sprint-title">Dias ${start}–${end}</div>
+        <div class="sprint-sub">${days.length}/10 dias${rev?.saved ? ' · Revisão feita ✓' : ''}</div>
+      </div>
+      <div class="sprint-pct">
+        <div class="sprint-pct-num">${pct}%</div>
+        <div class="sprint-pct-bar"><div class="sprint-pct-fill" style="width:${pct}%"></div></div>
+      </div>`;
+    div.onclick = () => openSprintModal(s);
+    lista.appendChild(div);
+  }
+
+  const rev = document.getElementById('sprint-revisao');
+  const revList = Object.keys(state.sprints).filter(s => state.sprints[s]?.saved).sort((a,b)=>Number(a)-Number(b));
+  if (!revList.length) { rev.innerHTML = '<div class="empty"><svg viewBox="0 0 24 24" style="fill:none;stroke:var(--border-med);stroke-width:1.5;stroke-linecap:round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><p>Nenhuma revisão registrada ainda.<br>Toque em um sprint para registrar.</p></div>'; return; }
+  rev.innerHTML = revList.map(s => {
+    const r = state.sprints[s];
+    return `<div class="card" style="margin-bottom:10px">
+      <div class="card-title" style="margin-bottom:8px">Sprint ${s} · Revisão</div>
+      ${r.conquista ? `<div class="obj-section"><div class="obj-section-label">Maior conquista</div><div class="obj-section-val">${r.conquista}</div></div>` : ''}
+      ${r.licao ? `<div class="obj-section"><div class="obj-section-label">Lição aprendida</div><div class="obj-section-val">${r.licao}</div></div>` : ''}
+      ${r.metaProx ? `<div class="obj-section"><div class="obj-section-label">Meta do próximo sprint</div><div class="obj-section-val">${r.metaProx}</div></div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+function setSprintTab(tab, el) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('sprint-lista').style.display = tab === 'lista' ? 'block' : 'none';
+  document.getElementById('sprint-revisao').style.display = tab === 'revisao' ? 'block' : 'none';
+}
+
+function openSprintModal(s) {
+  editingSprint = s;
+  const start = (s-1)*10+1, end = s*10;
+  document.getElementById('sprint-modal-title').innerHTML = 'Sprint ' + s + ' <small style="font-size:13px;font-weight:400;color:var(--text-muted)">· Dias ' + start + '–' + end + '</small>';
+  const r = state.sprints[s] || {};
+  document.getElementById('sprint-modal-body').innerHTML = `
+    <label>Maior conquista do sprint</label>
+    <textarea id="sp-conquista" rows="2" placeholder="O que você realizou de melhor?">${r.conquista||''}</textarea>
+    <label>Lição aprendida</label>
+    <textarea id="sp-licao" rows="2" placeholder="O que aprendeu com os erros?">${r.licao||''}</textarea>
+    <label>O que vou começar no próximo sprint</label>
+    <textarea id="sp-comecar" rows="2" placeholder="Nova ação ou hábito...">${r.comecar||''}</textarea>
+    <label>O que vou parar de fazer</label>
+    <input type="text" id="sp-parar" value="${r.parar||''}" placeholder="O que não está funcionando?">
+    <label>Meta do próximo sprint</label>
+    <input type="text" id="sp-meta-prox" value="${r.metaProx||''}" placeholder="Objetivo principal">
+    <label>Receita realizada no sprint (R$)</label>
+    <input type="number" id="sp-receita" value="${r.receita||''}" placeholder="0">
+  `;
+  openModal('sprint');
+}
+
+function saveSprint() {
+  if (!editingSprint) return;
+  state.sprints[editingSprint] = {
+    conquista: document.getElementById('sp-conquista')?.value || '',
+    licao: document.getElementById('sp-licao')?.value || '',
+    comecar: document.getElementById('sp-comecar')?.value || '',
+    parar: document.getElementById('sp-parar')?.value || '',
+    metaProx: document.getElementById('sp-meta-prox')?.value || '',
+    receita: parseFloat(document.getElementById('sp-receita')?.value) || 0,
+    saved: true
+  };
+  persist();
+  closeModal('sprint');
+  renderSprints();
+}
+
+function renderObjetivo() {
+  const o = state.objetivo || {};
+  const display = document.getElementById('obj-display');
+  if (!o.central) {
+    display.innerHTML = '<div class="empty"><svg viewBox="0 0 24 24" style="fill:none;stroke:var(--border-med);stroke-width:1.5;stroke-linecap:round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg><p>Defina seu objetivo para começar.</p></div>';
+  } else {
+    display.innerHTML = `
+      <div class="obj-section"><div class="obj-section-label">Objetivo</div><div class="obj-section-val">${o.central}</div></div>
+      ${o.porque ? `<div class="obj-section"><div class="obj-section-label">Por que é essencial</div><div class="obj-section-val" style="font-size:13px">${o.porque}</div></div>` : ''}
+      <div class="two-col" style="margin-top:10px">
+        <div class="metric"><div class="metric-label">Receita alvo</div><div class="metric-val" style="font-size:16px">R$ ${(o.receitaAlvo||0).toLocaleString('pt-BR')}</div></div>
+        <div class="metric"><div class="metric-label">Clientes alvo</div><div class="metric-val" style="font-size:20px">${o.clientes||'—'} <small>pessoas</small></div></div>
+      </div>
+      ${o.marco ? `<div class="obj-section" style="margin-top:10px"><div class="obj-section-label">Marco de sucesso</div><div class="obj-section-val" style="font-size:13px">${o.marco}</div></div>` : ''}`;
+  }
+  const hist = document.getElementById('historico');
+  const days = Object.keys(state.days).map(Number).filter(d => state.days[d]?.saved).sort((a,b)=>b-a).slice(0,6);
+  if (!days.length) { hist.innerHTML = '<p style="font-size:13px;color:var(--text-muted);padding:8px 0">Nenhuma entrada ainda.</p>'; return; }
+  hist.innerHTML = days.map(d => {
+    const e = state.days[d];
+    return `<div class="hist-row">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px">
+        <span style="font-size:12px;font-weight:600;color:var(--blue)">Dia ${d} · Sprint ${getSprint(d)}</span>
+        ${e.receita>0 ? `<span style="font-size:12px;color:var(--green);font-weight:600">+R$ ${e.receita.toLocaleString('pt-BR')}</span>` : ''}
+      </div>
+      ${e.foco ? `<div style="font-size:13px">${e.foco}</div>` : ''}
+      ${e.conquista ? `<div style="font-size:12px;color:var(--text-muted);margin-top:2px">${e.conquista}</div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+function openModal(id) {
+  document.getElementById('modal-' + id).classList.add('open');
+  if (id === 'objetivo') {
+    const o = state.objetivo || {};
+    ['central','porque','marco'].forEach(k => { const el = document.getElementById('obj-'+k); if(el) el.value = o[k]||''; });
+    const ra = document.getElementById('obj-receita-alvo'); if(ra) ra.value = o.receitaAlvo||'';
+    const cl = document.getElementById('obj-clientes'); if(cl) cl.value = o.clientes||'';
+    const ini = document.getElementById('obj-inicio'); if(ini) ini.value = state.startDate||'';
+  }
+  if (id === 'config') {
+    const n = document.getElementById('cfg-nome'); if(n) n.value = state.nome||'';
+    const d = document.getElementById('cfg-dia'); if(d) d.value = state.currentDay||1;
+  }
+}
+
+function closeModal(id) { document.getElementById('modal-' + id).classList.remove('open'); }
+
+function saveObjetivo() {
+  state.objetivo = {
+    central: document.getElementById('obj-central')?.value || '',
+    porque: document.getElementById('obj-porque')?.value || '',
+    receitaAlvo: parseFloat(document.getElementById('obj-receita-alvo')?.value) || 0,
+    clientes: parseInt(document.getElementById('obj-clientes')?.value) || 0,
+    marco: document.getElementById('obj-marco')?.value || ''
+  };
+  const ini = document.getElementById('obj-inicio')?.value;
+  if (ini) state.startDate = ini;
+  persist(); closeModal('objetivo'); renderObjetivo(); renderProgresso();
+}
+
+function saveConfig() {
+  state.nome = document.getElementById('cfg-nome')?.value || '';
+  const d = parseInt(document.getElementById('cfg-dia')?.value) || 1;
+  state.currentDay = Math.max(1, Math.min(DAYS, d));
+  persist(); closeModal('config'); render();
+}
+
+function clearData() {
+  if (confirm('Tem certeza? Todos os dados serão apagados permanentemente.')) {
+    localStorage.removeItem('d100v2');
+    state = { currentDay:1, nome:'', startDate: new Date().toISOString().split('T')[0], objetivo:{}, days:{}, sprints:{} };
+    persist(); closeModal('config'); render();
+  }
+}
+
+function goScreen(id, btn) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('screen-' + id)?.classList.add('active');
+  if (btn) btn.classList.add('active');
+  else document.querySelectorAll('.nav-btn').forEach(b => { if (b.getAttribute('onclick')?.includes(id)) b.classList.add('active'); });
+  if (id === 'progresso') renderProgresso();
+  if (id === 'sprints') renderSprints();
+  if (id === 'objetivo') renderObjetivo();
+}
+
+// Close modals on overlay click
+document.querySelectorAll('.modal-overlay').forEach(m => {
+  m.addEventListener('click', e => { if (e.target === m) m.classList.remove('open'); });
+});
+
+load();
+</script>
+</body>
+</html>
