@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Registro">
+<meta name="theme-color" content="#14181A">
+<title>Registro de Treinos</title>
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#14181A;
+    --surface:#1C2224;
+    --surface-2:#20282B;
+    --line:#2A3336;
+    --text:#ECEFEE;
+    --text-mute:#8B9694;
+    --accent:#C6FF3D;
+    --accent-dim:#8FCB1F;
+    --danger:#FF6B5E;
+    --radius:14px;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color: transparent;}
+  html,body{margin:0; padding:0; background:var(--bg); color:var(--text); font-family:'Inter',sans-serif; overscroll-behavior-y:none;}
+  body{
+    padding-bottom:48px;
+    min-height:100vh;
+  }
+  ::selection{background:var(--accent); color:#11140f;}
+
+  .mono{font-family:'JetBrains Mono',monospace;}
+
+  /* ---------- Header ---------- */
+  header{
+    position:sticky; top:0; z-index:20;
+    background:linear-gradient(180deg, var(--bg) 70%, rgba(20,24,26,0));
+    padding:env(safe-area-inset-top,0px) 18px 0 18px;
+    backdrop-filter:blur(6px);
+  }
+  .header-row{
+    display:flex; align-items:baseline; justify-content:space-between;
+    padding-top:18px;
+  }
+  h1{
+    font-family:'Bebas Neue',sans-serif;
+    font-size:34px; letter-spacing:1.5px; margin:0; line-height:1;
+    color:var(--text);
+  }
+  h1 span{color:var(--accent);}
+  .subtitle{
+    font-size:11px; color:var(--text-mute); text-transform:uppercase; letter-spacing:1.5px;
+    margin:2px 0 14px 0; font-weight:500;
+  }
+
+  /* ---------- Client tabs ---------- */
+  .tabs-wrap{
+    display:flex; align-items:center; gap:8px;
+    overflow-x:auto; padding-bottom:14px; scrollbar-width:none;
+  }
+  .tabs-wrap::-webkit-scrollbar{display:none;}
+  .tab{
+    flex:0 0 auto;
+    font-family:'Bebas Neue',sans-serif; letter-spacing:0.5px;
+    font-size:17px;
+    padding:9px 16px 7px;
+    border-radius:999px;
+    border:1px solid var(--line);
+    background:var(--surface);
+    color:var(--text-mute);
+    cursor:pointer;
+    white-space:nowrap;
+    transition:all .15s ease;
+  }
+  .tab.active{
+    background:var(--accent);
+    color:#11140f;
+    border-color:var(--accent);
+  }
+  .tab-add{
+    flex:0 0 auto;
+    width:36px; height:36px; border-radius:50%;
+    border:1px dashed var(--text-mute);
+    background:transparent; color:var(--text-mute);
+    font-size:18px; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .tab-add:active{transform:scale(0.92);}
+
+  main{padding:0 18px;}
+
+  /* ---------- Empty states ---------- */
+  .empty{
+    text-align:center; padding:70px 20px;
+    color:var(--text-mute);
+  }
+  .empty .big{
+    font-family:'Bebas Neue',sans-serif; font-size:26px; color:var(--text);
+    letter-spacing:0.5px; margin-bottom:6px;
+  }
+  .empty p{font-size:14px; line-height:1.5; max-width:280px; margin:0 auto;}
+  .empty button{margin-top:18px;}
+
+  /* ---------- Buttons ---------- */
+  .btn{
+    font-family:'Inter',sans-serif; font-weight:600; font-size:14px;
+    border:none; border-radius:10px; padding:13px 18px;
+    cursor:pointer; transition:transform .1s ease, opacity .15s ease;
+  }
+  .btn:active{transform:scale(0.97);}
+  .btn-primary{background:var(--accent); color:#11140f;}
+  .btn-ghost{background:var(--surface); color:var(--text); border:1px solid var(--line);}
+  .btn-danger{background:rgba(255,107,94,0.12); color:var(--danger); border:1px solid rgba(255,107,94,0.3);}
+  .btn-block{width:100%;}
+  .btn-sm{padding:8px 12px; font-size:12.5px; border-radius:8px;}
+
+  .client-actions{display:flex; gap:8px; margin:6px 0 18px 0;}
+  .client-actions .btn{flex:1;}
+
+  /* ---------- Form panel ---------- */
+  .panel{
+    background:var(--surface); border:1px solid var(--line); border-radius:var(--radius);
+    padding:16px; margin-bottom:20px;
+    display:none;
+  }
+  .panel.open{display:block;}
+  .panel-title{
+    font-family:'Bebas Neue',sans-serif; font-size:20px; letter-spacing:0.5px;
+    margin:0 0 14px 0; display:flex; justify-content:space-between; align-items:center;
+  }
+  label{
+    display:block; font-size:11px; text-transform:uppercase; letter-spacing:1px;
+    color:var(--text-mute); margin-bottom:6px; font-weight:600;
+  }
+  input[type=text], input[type=date], textarea{
+    width:100%; background:var(--surface-2); border:1px solid var(--line); color:var(--text);
+    border-radius:9px; padding:11px 12px; font-size:15px; font-family:'Inter',sans-serif;
+    margin-bottom:14px;
+  }
+  input[type=date]{font-family:'JetBrains Mono',monospace; color-scheme:dark;}
+  textarea{resize:vertical; min-height:64px; font-family:'Inter',sans-serif;}
+  input:focus, textarea:focus{outline:2px solid var(--accent); outline-offset:1px;}
+
+  .ex-row{
+    background:var(--surface-2); border:1px solid var(--line); border-radius:10px;
+    padding:12px; margin-bottom:10px; position:relative;
+  }
+  .ex-row .ex-grid{
+    display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-top:8px;
+  }
+  .ex-row input{margin-bottom:0;}
+  .ex-row .rm-ex{
+    position:absolute; top:8px; right:8px;
+    background:none; border:none; color:var(--text-mute);
+    font-size:16px; cursor:pointer; line-height:1; padding:4px;
+  }
+  .add-ex{
+    width:100%; background:transparent; border:1px dashed var(--line); color:var(--accent);
+    border-radius:9px; padding:10px; font-size:13px; font-weight:600; cursor:pointer; margin-bottom:16px;
+  }
+  .panel-buttons{display:flex; gap:10px;}
+  .panel-buttons .btn{flex:1;}
+
+  /* ---------- Timeline ---------- */
+  .timeline{position:relative; padding-left:22px; margin-top:4px;}
+  .timeline::before{
+    content:""; position:absolute; left:5px; top:6px; bottom:6px; width:2px;
+    background:linear-gradient(180deg, var(--accent) 0%, var(--line) 12%, var(--line) 100%);
+  }
+  .entry{position:relative; margin-bottom:18px;}
+  .entry::before{
+    content:""; position:absolute; left:-22px; top:6px;
+    width:11px; height:11px; border-radius:50%;
+    background:var(--bg); border:2px solid var(--accent);
+  }
+  .entry:not(:first-child)::before{border-color:var(--text-mute);}
+  .entry-card{
+    background:var(--surface); border:1px solid var(--line); border-radius:var(--radius);
+    padding:14px 16px;
+  }
+  .entry-head{
+    display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px;
+  }
+  .entry-date{
+    font-family:'JetBrains Mono',monospace; font-size:13px; color:var(--accent); font-weight:700;
+    letter-spacing:0.5px;
+  }
+  .entry-rel{font-size:10.5px; color:var(--text-mute); text-transform:uppercase; letter-spacing:0.5px; margin-top:2px;}
+  .entry-menu{display:flex; gap:6px;}
+  .icon-btn{
+    background:var(--surface-2); border:1px solid var(--line); color:var(--text-mute);
+    width:28px; height:28px; border-radius:7px; font-size:13px; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .ex-table{width:100%; border-collapse:collapse; margin-bottom:8px;}
+  .ex-table th{
+    font-size:9.5px; text-transform:uppercase; letter-spacing:0.8px; color:var(--text-mute);
+    text-align:left; font-weight:600; padding:0 8px 6px 0; border-bottom:1px solid var(--line);
+  }
+  .ex-table td{
+    font-size:13.5px; padding:7px 8px 7px 0; border-bottom:1px solid rgba(255,255,255,0.04);
+  }
+  .ex-table td:first-child{font-weight:600;}
+  .ex-table td.num, .ex-table th.num{font-family:'JetBrains Mono',monospace;}
+  .entry-obs{
+    font-size:13px; color:var(--text-mute); line-height:1.5; margin-top:6px;
+    padding-top:8px; border-top:1px solid var(--line);
+  }
+
+  /* ---------- Modal ---------- */
+  .overlay{
+    position:fixed; inset:0; background:rgba(0,0,0,0.6);
+    display:none; align-items:flex-end; justify-content:center; z-index:50;
+  }
+  .overlay.open{display:flex;}
+  .modal{
+    background:var(--surface); border:1px solid var(--line);
+    border-radius:18px 18px 0 0; padding:20px 18px calc(20px + env(safe-area-inset-bottom,0px));
+    width:100%; max-width:480px;
+  }
+  .modal h3{font-family:'Bebas Neue',sans-serif; font-size:22px; margin:0 0 14px 0; letter-spacing:0.5px;}
+
+  .footer-note{
+    text-align:center; font-size:10.5px; color:var(--text-mute); margin-top:30px; line-height:1.6;
+  }
+  .footer-note button{
+    background:none; border:none; color:var(--text-mute); text-decoration:underline;
+    font-size:10.5px; cursor:pointer; padding:0;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-row">
+    <h1>REGISTRO<span>.</span></h1>
+  </div>
+  <div class="subtitle">treinos por cliente</div>
+  <div class="tabs-wrap" id="tabsWrap"></div>
+</header>
+
+<main>
+  <div id="clientActions" class="client-actions" style="display:none;">
+    <button class="btn btn-primary" id="btnNovoTreino">+ Novo treino</button>
+    <button class="btn btn-ghost btn-sm" id="btnDeleteClient" style="flex:0 0 auto;">Excluir cliente</button>
+  </div>
+
+  <div id="formPanel" class="panel">
+    <div class="panel-title">
+      <span id="formTitle">Novo treino</span>
+      <button class="icon-btn" id="btnCloseForm">✕</button>
+    </div>
+    <label>Data</label>
+    <input type="date" id="inputData">
+    <div id="exList"></div>
+    <button type="button" class="add-ex" id="btnAddEx">+ adicionar exercício</button>
+    <label>Observações</label>
+    <textarea id="inputObs" placeholder="Carga aumentada, dor reportada, ajuste de técnica..."></textarea>
+    <div class="panel-buttons">
+      <button class="btn btn-ghost" id="btnCancelForm">Cancelar</button>
+      <button class="btn btn-primary" id="btnSaveForm">Salvar treino</button>
+    </div>
+  </div>
+
+  <div id="timeline" class="timeline"></div>
+  <div id="emptyState" class="empty" style="display:none;"></div>
+</main>
+
+<div class="overlay" id="clientModal">
+  <div class="modal">
+    <h3>Novo cliente</h3>
+    <label>Nome</label>
+    <input type="text" id="inputClientName" placeholder="Ex: Marina Souza">
+    <div class="panel-buttons">
+      <button class="btn btn-ghost" id="btnCancelClient">Cancelar</button>
+      <button class="btn btn-primary" id="btnSaveClient">Adicionar</button>
+    </div>
+  </div>
+</div>
+
+<div class="footer-note">
+  dados salvos neste aparelho · <button id="btnExport">exportar backup</button> · <button id="btnImport">importar backup</button>
+  <input type="file" id="fileImport" accept="application/json" style="display:none;">
+</div>
+
+<script>
+(function(){
+  const STORAGE_KEY = 'pt_registro_treinos_v1';
+  let state = load();
+  let editingWorkoutId = null;
+  let exRowCount = 0;
+
+  function load(){
+    try{
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if(raw) return JSON.parse(raw);
+    }catch(e){}
+    return { clients: [], activeClientId: null };
+  }
+  function save(){
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  }
+  function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+
+  function activeClient(){
+    return state.clients.find(c => c.id === state.activeClientId) || null;
+  }
+
+  function formatDate(iso){
+    if(!iso) return '';
+    const [y,m,d] = iso.split('-');
+    return `${d}/${m}/${y}`;
+  }
+  function relativeLabel(iso){
+    const today = new Date(); today.setHours(0,0,0,0);
+    const d = new Date(iso + 'T00:00:00');
+    const diff = Math.round((today - d) / 86400000);
+    if(diff === 0) return 'hoje';
+    if(diff === 1) return 'ontem';
+    if(diff > 1) return `há ${diff} dias`;
+    if(diff === -1) return 'amanhã';
+    return '';
+  }
+
+  // ---------- Render: tabs ----------
+  function renderTabs(){
+    const wrap = document.getElementById('tabsWrap');
+    wrap.innerHTML = '';
+    state.clients.forEach(c => {
+      const btn = document.createElement('button');
+      btn.className = 'tab' + (c.id === state.activeClientId ? ' active' : '');
+      btn.textContent = c.name;
+      btn.onclick = () => { state.activeClientId = c.id; save(); closeForm(); renderAll(); };
+      wrap.appendChild(btn);
+    });
+    const add = document.createElement('button');
+    add.className = 'tab-add';
+    add.textContent = '+';
+    add.onclick = openClientModal;
+    wrap.appendChild(add);
+  }
+
+  // ---------- Render: main area ----------
+  function renderAll(){
+    renderTabs();
+    const client = activeClient();
+    const actions = document.getElementById('clientActions');
+    const empty = document.getElementById('emptyState');
+    const timeline = document.getElementById('timeline');
+
+    if(!client){
+      actions.style.display = 'none';
+      timeline.innerHTML = '';
+      empty.style.display = 'block';
+      if(state.clients.length === 0){
+        empty.innerHTML = `<div class="big">Nenhum cliente ainda</div>
+          <p>Adicione seu primeiro cliente para começar a registrar os treinos.</p>
+          <button class="btn btn-primary" id="emptyAddBtn">+ Adicionar cliente</button>`;
+        document.getElementById('emptyAddBtn').onclick = openClientModal;
+      } else {
+        empty.innerHTML = `<div class="big">Selecione um cliente</div>
+          <p>Toque em uma aba acima para ver o histórico de treinos.</p>`;
+      }
+      return;
+    }
+
+    actions.style.display = 'flex';
+    empty.style.display = client.workouts.length ? 'none' : 'block';
+
+    if(!client.workouts.length){
+      empty.innerHTML = `<div class="big">Sem treinos registrados</div>
+        <p>Toque em "+ Novo treino" para começar o histórico de ${escapeHtml(client.name)}.</p>`;
+    }
+
+    const sorted = [...client.workouts].sort((a,b) => b.date.localeCompare(a.date) || b.id.localeCompare(a.id));
+    timeline.innerHTML = '';
+    sorted.forEach(w => timeline.appendChild(renderEntry(w)));
+  }
+
+  function renderEntry(w){
+    const entry = document.createElement('div');
+    entry.className = 'entry';
+    const rel = relativeLabel(w.date);
+    let rows = '';
+    w.exercises.forEach(ex => {
+      rows += `<tr>
+        <td>${escapeHtml(ex.nome)}</td>
+        <td class="num">${escapeHtml(ex.series)}</td>
+        <td class="num">${escapeHtml(ex.reps)}</td>
+        <td class="num">${escapeHtml(ex.carga)}</td>
+      </tr>`;
+    });
+    entry.innerHTML = `
+      <div class="entry-card">
+        <div class="entry-head">
+          <div>
+            <div class="entry-date">${formatDate(w.date)}</div>
+            ${rel ? `<div class="entry-rel">${rel}</div>` : ''}
+          </div>
+          <div class="entry-menu">
+            <button class="icon-btn" data-edit="${w.id}">✎</button>
+            <button class="icon-btn" data-del="${w.id}">🗑</button>
+          </div>
+        </div>
+        ${w.exercises.length ? `<table class="ex-table">
+          <thead><tr><th>Exercício</th><th class="num">Séries</th><th class="num">Reps</th><th class="num">Carga</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table>` : ''}
+        ${w.obs ? `<div class="entry-obs">${escapeHtml(w.obs)}</div>` : ''}
+      </div>`;
+    entry.querySelector('[data-edit]').onclick = () => openForm(w.id);
+    entry.querySelector('[data-del]').onclick = () => deleteWorkout(w.id);
+    return entry;
+  }
+
+  function escapeHtml(str){
+    if(str === undefined || str === null) return '';
+    return String(str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  // ---------- Client modal ----------
+  function openClientModal(){
+    document.getElementById('inputClientName').value = '';
+    document.getElementById('clientModal').classList.add('open');
+    setTimeout(() => document.getElementById('inputClientName').focus(), 100);
+  }
+  function closeClientModal(){
+    document.getElementById('clientModal').classList.remove('open');
+  }
+  document.getElementById('btnCancelClient').onclick = closeClientModal;
+  document.getElementById('clientModal').onclick = (e) => { if(e.target.id === 'clientModal') closeClientModal(); };
+  document.getElementById('btnSaveClient').onclick = () => {
+    const name = document.getElementById('inputClientName').value.trim();
+    if(!name) return;
+    const client = { id: uid(), name, workouts: [] };
+    state.clients.push(client);
+    state.activeClientId = client.id;
+    save();
+    closeClientModal();
+    renderAll();
+  };
+
+  document.getElementById('btnDeleteClient').onclick = () => {
+    const client = activeClient();
+    if(!client) return;
+    if(confirm(`Excluir ${client.name} e todo o histórico de treinos? Esta ação não pode ser desfeita.`)){
+      state.clients = state.clients.filter(c => c.id !== client.id);
+      state.activeClientId = state.clients.length ? state.clients[0].id : null;
+      save();
+      renderAll();
+    }
+  };
+
+  // ---------- Workout form ----------
+  function openForm(workoutId){
+    editingWorkoutId = workoutId || null;
+    const panel = document.getElementById('formPanel');
+    const exList = document.getElementById('exList');
+    exList.innerHTML = '';
+    exRowCount = 0;
+
+    if(editingWorkoutId){
+      const client = activeClient();
+      const w = client.workouts.find(x => x.id === editingWorkoutId);
+      document.getElementById('formTitle').textContent = 'Editar treino';
+      document.getElementById('inputData').value = w.date;
+      document.getElementById('inputObs').value = w.obs || '';
+      w.exercises.forEach(ex => addExerciseRow(ex));
+    } else {
+      document.getElementById('formTitle').textContent = 'Novo treino';
+      document.getElementById('inputData').value = new Date().toISOString().slice(0,10);
+      document.getElementById('inputObs').value = '';
+      addExerciseRow();
+    }
+    panel.classList.add('open');
+    panel.scrollIntoView({behavior:'smooth', block:'start'});
+  }
+  function closeForm(){
+    document.getElementById('formPanel').classList.remove('open');
+    editingWorkoutId = null;
+  }
+  document.getElementById('btnNovoTreino').onclick = () => openForm(null);
+  document.getElementById('btnCloseForm').onclick = closeForm;
+  document.getElementById('btnCancelForm').onclick = closeForm;
+
+  function addExerciseRow(ex){
+    exRowCount++;
+    const id = 'ex_' + exRowCount + '_' + uid();
+    const row = document.createElement('div');
+    row.className = 'ex-row';
+    row.dataset.rowId = id;
+    row.innerHTML = `
+      <button type="button" class="rm-ex">✕</button>
+      <label>Exercício</label>
+      <input type="text" class="ex-nome" placeholder="Ex: Supino reto" value="${ex ? escapeHtml(ex.nome) : ''}">
+      <div class="ex-grid">
+        <div><label>Séries</label><input type="text" class="ex-series" placeholder="4" value="${ex ? escapeHtml(ex.series) : ''}"></div>
+        <div><label>Reps</label><input type="text" class="ex-reps" placeholder="10-12" value="${ex ? escapeHtml(ex.reps) : ''}"></div>
+        <div><label>Carga</label><input type="text" class="ex-carga" placeholder="20kg" value="${ex ? escapeHtml(ex.carga) : ''}"></div>
+      </div>`;
+    row.querySelector('.rm-ex').onclick = () => row.remove();
+    document.getElementById('exList').appendChild(row);
+  }
+  document.getElementById('btnAddEx').onclick = () => addExerciseRow();
+
+  document.getElementById('btnSaveForm').onclick = () => {
+    const client = activeClient();
+    if(!client) return;
+    const date = document.getElementById('inputData').value;
+    if(!date){ alert('Selecione a data do treino.'); return; }
+    const obs = document.getElementById('inputObs').value.trim();
+    const exercises = [];
+    document.querySelectorAll('#exList .ex-row').forEach(row => {
+      const nome = row.querySelector('.ex-nome').value.trim();
+      const series = row.querySelector('.ex-series').value.trim();
+      const reps = row.querySelector('.ex-reps').value.trim();
+      const carga = row.querySelector('.ex-carga').value.trim();
+      if(nome) exercises.push({ nome, series, reps, carga });
+    });
+
+    if(editingWorkoutId){
+      const w = client.workouts.find(x => x.id === editingWorkoutId);
+      w.date = date; w.obs = obs; w.exercises = exercises;
+    } else {
+      client.workouts.push({ id: uid(), date, obs, exercises });
+    }
+    save();
+    closeForm();
+    renderAll();
+  };
+
+  function deleteWorkout(id){
+    if(!confirm('Excluir este treino do histórico?')) return;
+    const client = activeClient();
+    client.workouts = client.workouts.filter(w => w.id !== id);
+    save();
+    renderAll();
+  }
+
+  // ---------- Backup ----------
+  document.getElementById('btnExport').onclick = () => {
+    const blob = new Blob([JSON.stringify(state, null, 2)], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `registro-treinos-backup-${new Date().toISOString().slice(0,10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+  document.getElementById('btnImport').onclick = () => document.getElementById('fileImport').click();
+  document.getElementById('fileImport').onchange = (e) => {
+    const file = e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try{
+        const data = JSON.parse(reader.result);
+        if(!data.clients) throw new Error('formato inválido');
+        if(confirm('Importar este backup vai substituir todos os dados atuais. Continuar?')){
+          state = data;
+          save();
+          renderAll();
+        }
+      }catch(err){
+        alert('Não foi possível importar este arquivo.');
+      }
+      e.target.value = '';
+    };
+    reader.readAsText(file);
+  };
+
+  renderAll();
+})();
+</script>
+</body>
+</html>
